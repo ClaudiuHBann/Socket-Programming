@@ -1,6 +1,7 @@
 #undef UNICODE
 
 #define WIN32_LEAN_AND_MEAN
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 
 #include <Winsock2.h>
 #include <iostream>
@@ -132,13 +133,19 @@ int main()
 		}
 		else
 		{
+			std::cout << "The client " << inet_ntoa(clientHint.sin_addr) << " has connected on port " << htons(clientHint.sin_port) << " to the server!" << std::endl;
+			
 			std::thread newClientThread(NewClient, clientSocket);
 			newClientThread.detach();
 
 			clientsList.insert(std::pair<SOCKET, sockaddr_in>(clientSocket, clientHint));
 		}
+		
+		memset(&clientHint, 0, sizeof(clientHint)); // clear client hint variable
 	}
 
+	closeClientThreads = true;
+	
 	shutdown(serverSocket, SD_BOTH);
 	closesocket(serverSocket);
 	WSACleanup();
