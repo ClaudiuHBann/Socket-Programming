@@ -16,6 +16,7 @@
 #undef UNICODE
 
 #define WIN32_LEAN_AND_MEAN
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 
 #include <Winsock2.h> // library with which we can use windows socket API functions, already includes Windows.h
 #include <iostream> // library with which we can use in and out streams
@@ -186,6 +187,8 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
+	std::cout << "The server has been started!" << std::endl;
+
 	while (true)
 	{
 		/*
@@ -203,6 +206,8 @@ int main()
 		}
 		else
 		{
+			std::cout << "The client " << inet_ntoa(clientHint.sin_addr) << " has connected on port " << htons(clientHint.sin_port) << " to the server!" << std::endl;
+
 			// create a new thread for a new client
 			std::thread newClientThread(NewClient, clientSocket);
 			newClientThread.detach();
@@ -210,7 +215,11 @@ int main()
 			// add the client to the server's clients
 			clientsList.insert(std::pair<SOCKET, sockaddr_in>(clientSocket, clientHint));
 		}
+
+		memset(&clientHint, 0, sizeof(clientHint)); // clear client hint variable
 	}
+
+	closeClientThreads = true;
 
 	/*
 		shutdown and close the server
